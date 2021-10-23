@@ -17,6 +17,7 @@ esac
 
 ~/.config/bspwm/scripts/init.sh &
 ~/.config/bspwm/scripts/shadows.sh &
+pidof bspswallow || bspswallow &
 
 bspc config border_width         2
 bspc config window_gap           2
