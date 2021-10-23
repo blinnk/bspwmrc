@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 move_to_previous_desktop(){
   bspc desktop -f last.occupied

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if ! bspc wm -g &>/dev/null; then
   exit 1
@@ -6,21 +6,17 @@ fi
 
 pgrep -x sxhkd > /dev/null || sxhkd &
 
-if [ "$HOSTNAME" = "pc" ]; then
-    /home/blinnnk/.local/bin/multiple-monitors.sh &
-    bspc monitor DisplayPort-1 -d 1 2 3 4 5
-    bspc monitor DVI-D-0 -d 6 7 8 9 0
-else
-    bspc monitor eDP1 -d 1 2 3 4 5 6
-fi
+# check if dual monitor config should be used
+case $(uname -n) in
+    (pc) ~/.config/bspwm/scripts/multiple-monitors.sh & \
+    bspc monitor DisplayPort-1 -d 1 2 3
+    bspc monitor DVI-D-0 -d 4 5 6 ;;
+    (x1) bspc monitor eDP1 -d 1 2 3 4 5 6
+        ~/.config/bspwm/scripts/switchnodes.sh & ;;
+esac
 
-
-killall -q polybar
-
-~/.config/polybar/scripts/launch.sh &
-
-# I hate mouse drift.
-# xset mouse 2.5 0
+~/.config/bspwm/scripts/init.sh &
+~/.config/bspwm/scripts/shadows.sh &
 
 bspc config border_width         2
 bspc config window_gap           2
@@ -48,36 +44,22 @@ bspc config pointer_motion_interval 10
 
 # remove all rules first
 bspc rule -r *:*
-# shared workspaces / rules
+
+bspc rule --add '*:floating' state=floating
+bspc rule -a '*:pop-up' state=floating sticky=on
+
 bspc rule -a Chromium follow=on focus=on state=floating rectangle=1200x900+0+0 center=true
 bspc rule -a Alacritty:Float follow=on focus=on state=floating rectangle=800x600+0+0 center=true
-# bspc rule -a Alacritty follow=on focus=on state=floating rectangle=1825x850+0+0 center=true
 bspc rule -a Screenkey manage=off
-bspc rule -a '*:pop-up' state=floating sticky=on
 bspc rule -a Ripcord follow=on focus=on desktop=^8
+bspc rule -a Sxiv follow=on focus=on state=floating rectangle=600x500+0+0 center=true
+bspc rule -a gcolor2 state=floating follow=on focus=on rectangle=500x300+200+200
+bspc rule -a Yad follow=on focus=on state=floating rectangle=400x400+0+0 center=true
+bspc rule -a Peek state=floating rectangle=600x600+0+0 center=true
 
-case $HOSTNAME in
-    (pc) \
-        bspc rule -a Sxiv follow=on focus=on state=floating rectangle=600x500+0+0 center=true
-        bspc rule -a gcolor2 state=floating follow=on focus=on rectangle=500x300+200+200
-        bspc rule -a Zenity follow=on focus=on state=floating rectangle=300x200+0+0 center=true
-        bspc rule -a Yad follow=on focus=on state=floating rectangle=400x400+0+0 center=true
-        bspc rule -a kleopatra state=floating
-        bspc rule -a Peek state=floating rectangle=600x600+0+0 center=true
-        bspc rule -a zathura desktop=^4
-        bspc rule -a Slack desktop=^0 follow=on focus=on
-        bspc rule -a Evolution desktop=^9 follow=on focus=on
-        ;;
-    (x1) \
-        ~/.config/bspwm/scripts/switchnodes.sh ;;
-esac
-
-# bspc subscribe node_manage node_unmanage | while read -r a event; do
-#   bspc desktop "${event%% *}:focused" -l tiled
-# done &
-
-~/.config/bspwm/scripts/init.sh &
-~/.config/bspwm/scripts/shadows.sh &
+bspc subscribe node_manage node_unmanage | while read -r a event; do
+  bspc desktop "${event%% *}:focused" -l tiled
+done &
 
 trap 'jobs -p | xargs kill' EXIT
 

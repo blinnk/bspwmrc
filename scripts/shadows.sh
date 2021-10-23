@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 bspc subscribe node_state | while read -r _ _ _ node state status; do
     if [[ "$state" == "floating" ]]; then

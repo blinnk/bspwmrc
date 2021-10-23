@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 #  D=$(bspc query –desktops –desktop focused);
 #  W=$(bspc query –windows –window focused);
